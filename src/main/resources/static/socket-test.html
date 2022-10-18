@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <title>Document</title>
+    <style>
+        .box {
+            border: 1px solid black;
+            padding: 30px;
+        }
+
+        .item {
+            border: 1px solid blue;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Hello</h1>
+    <hr />
+    <button id="btnSend1">메시지전송 채널1</button>
+    <button id="btnSend2">메시지전송 채널2</button>
+    <div class="box" id="box">
+
+    </div>
+    <script>
+
+        var sockJs = new SockJS("/ws");
+        var stomp = Stomp.over(sockJs);
+
+        stomp.connect({}, function () {
+            console.log("1.웹소켓 핸드쉐이크 연결 완료");
+
+            console.log("2.채널 1 구독 완료");
+            stomp.subscribe("/sub/channel/1", function (chat) {
+                var content = JSON.parse(chat.body);
+                var itemBox = `<div class="item">${content.data}</div>`;
+                $("#box").append(itemBox);
+            });
+        });
+
+        $("#btnSend1").click(() => {
+            console.log("3.채널 1 메시지 전송 완료");
+            stomp.send('/pub/hello', {}, JSON.stringify({ channelId: 1, sender: "ssar", data: "채널1" }))
+        });
+
+        $("#btnSend2").click(() => {
+            console.log("3.채널 2 메시지 전송 완료");
+            stomp.send('/pub/hello', {}, JSON.stringify({ channelId: 2, sender: "ssar", data: "채널2" }))
+        });
+
+
+    </script>
+</body>
+
+</html>
